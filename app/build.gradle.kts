@@ -1,9 +1,20 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.grgit)
     alias(libs.plugins.detekt)
 }
+
+val debugKeystorePropertiesFile = rootProject.file("keystore/debug_keystore.properties")
+val debugKeystoreProperties = Properties()
+debugKeystoreProperties.load(FileInputStream(debugKeystorePropertiesFile))
+
+val releaseKeystorePropertiesFile = rootProject.file("keystore/release_keystore.properties")
+val releaseKeystoreProperties = Properties()
+releaseKeystoreProperties.load(FileInputStream(releaseKeystorePropertiesFile))
 
 android {
     namespace = "ua.edu.chnu.kkn.archtodo"
@@ -25,9 +36,29 @@ android {
         }
     }
 
+    signingConfigs {
+        create("ownDebug") {
+            keyAlias = debugKeystoreProperties["keyAlias"] as String
+            keyPassword = debugKeystoreProperties["keyPassword"] as String
+            storeFile = file(debugKeystoreProperties["storeFile"] as String)
+            storePassword = debugKeystoreProperties["storePassword"] as String
+        }
+        create("release") {
+            keyAlias = releaseKeystoreProperties["keyAlias"] as String
+            keyPassword = releaseKeystoreProperties["keyPassword"] as String
+            storeFile = file(releaseKeystoreProperties["storeFile"] as String)
+            storePassword = releaseKeystoreProperties["storePassword"] as String
+        }
+    }
+
     buildTypes {
-        release {
+        debug {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("ownDebug")
+        }
+        release {
+            isMinifyEnabled = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
