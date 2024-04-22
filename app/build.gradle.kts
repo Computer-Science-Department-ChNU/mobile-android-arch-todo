@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.grgit)
 }
 
 android {
@@ -11,8 +12,11 @@ android {
         applicationId = "ua.edu.chnu.kkn.archtodo"
         minSdk = 31
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = grgit.tag.list().size
+        versionName = grgit.describe {
+            tags = true
+            always = true
+        }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
